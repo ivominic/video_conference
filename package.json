@@ -1,0 +1,29 @@
+{
+  "name": "video_conference",
+  "version": "1.0.0",
+  "description": "Making video calls",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivominic/video_conference.git"
+  },
+  "keywords": [
+    "google",
+    "meet",
+    "video",
+    "call"
+  ],
+  "author": "Ivo Minić",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ivominic/video_conference/issues"
+  },
+  "homepage": "https://github.com/ivominic/video_conference#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "socket.io": "^4.5.1"
+  }
+}
