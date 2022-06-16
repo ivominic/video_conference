@@ -8,6 +8,23 @@
     <link rel="stylesheet" href="public/assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="public/assets/css/style.css" />
+    <script src="public/assets/js/jquery-3.4.1.min.js"></script>
+    <script src="public/assets/js/app.js"></script>
+    <script>
+      $(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        let meetingId = urlParams.get("meetingId");
+        let userId = window.prompt("Enter your username");
+
+        if (!userId || !meetingId) {
+          alert("Username or meeting id missing");
+          window.location.href = "/action.html";
+          return false;
+        }
+        $("#meetingContainer").show();
+        MyApp._init(userId, meetingId);
+      });
+    </script>
   </head>
   <body>
     <main class="d-flex flex-column home-wrap">
