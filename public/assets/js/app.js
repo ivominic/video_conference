@@ -1,13 +1,29 @@
 var MyApp = (function () {
+  let socket = null;
+  let userId = "";
+  let meetingId = "";
+
   function init(uid, mid) {
+    userId = uid;
+    meetingId = mid;
     eventProcesForSignalingServer();
   }
 
-  let socket = null;
   function eventProcesForSignalingServer() {
     socket = io.connect();
     socket.on("connect", () => {
-      alert("socket connected on client side.");
+      if (socket.connected) {
+        if (userId && meetingId) {
+          socket.emit("userconnect", {
+            displayName: userId,
+            meetingId: meetingId,
+          });
+        }
+      }
+    });
+
+    socket.on("inform_others_about_me", (data) => {
+      addUser(data.otherUserId, data.connId);
     });
   }
 
