@@ -1,6 +1,14 @@
 var MyApp = (function () {
   function init(uid, mid) {
-    alert("TEST");
+    eventProcesForSignalingServer();
+  }
+
+  let socket = null;
+  function eventProcesForSignalingServer() {
+    socket = io.connect();
+    socket.on("connect", () => {
+      alert("socket connected on client side.");
+    });
   }
 
   return {
