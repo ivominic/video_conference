@@ -153,6 +153,15 @@ let MyApp = (function () {
       AppProcess.setNewConnection(connId);
     });
 
+    socket.on("inform_me_about_other_user", (otherUsers) => {
+      if (otherUsers) {
+        for (i = 0; i < otherUsers.length; i++) {
+          addUser(otherUsers[i].userId, otherUsers[i].connectionId);
+          AppProcess.setNewConnection(otherUsers[i].connectionId);
+        }
+      }
+    });
+
     socket.on("SDPProcess", async function (data) {
       await AppProcess.processClientFunc(data.message, fromConnId);
     });
