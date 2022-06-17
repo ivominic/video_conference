@@ -14,11 +14,26 @@ let AppProcess = (function () {
   let peersConnection = [];
   let remoteVideoStream = [];
   let remoteAudioStream = [];
+  let localDiv;
   let serverProcess;
 
   async function _init(sdpFunction, myConnId) {
     serverProcess = sdpFunction;
     myConnectionID = myConnId;
+    eventProcess();
+    localDiv = document.querySelector("#localVideoPlayer");
+  }
+
+  async function eventProcess() {
+    document.querySelector("#micMuteUnmute").on("click", async function () {
+      if (!audio) {
+        await loadAudio();
+      }
+      if (!audio) {
+        alert("Audio permission has not been granted.");
+        return;
+      }
+    });
   }
 
   async function setNewConnection(connId) {
