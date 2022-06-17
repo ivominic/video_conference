@@ -1,4 +1,5 @@
 const express = require("express");
+const { SocketAddress } = require("net");
 const path = require("path");
 
 let app = express();
@@ -29,6 +30,12 @@ io.on("connection", (socket) => {
         otherUserId: data.displayName,
         connId: socket.id,
       });
+    });
+  });
+  socket.on("SDPProcess", (data) => {
+    socket.to(data.toConnId).emit("SDPProcess", {
+      message: data.message,
+      fromConnId: socket.id,
     });
   });
 });
