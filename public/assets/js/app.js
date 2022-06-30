@@ -19,12 +19,14 @@ let AppProcess = (function () {
   let audio;
   let isAudioMute = true;
   let rtpAudioSenders = [];
+  let rtpVideoSenders = [];
   let videoStates = {
     None: 0,
     Camera: 1,
     ScreenShare: 2,
   };
   let videoState = videoStates.None;
+  let videoCamTrack;
 
   async function _init(sdpFunction, myConnId) {
     serverProcess = sdpFunction;
@@ -34,7 +36,7 @@ let AppProcess = (function () {
   }
 
   async function eventProcess() {
-    document.querySelector("#micMuteUnmute").on("click", async function () {
+    $("#micMuteUnmute").on("click", async function () {
       if (audio) {
         await loadAudio();
       }
@@ -54,20 +56,56 @@ let AppProcess = (function () {
       isAudioMute = !isAudioMute;
     });
 
-    document.querySelector("#videoCamOnOff").on("click", async function () {
-      if ((videoState = videoStates.Camera)) {
+    $("#videoCamOnOff").on("click", async function () {
+      if (videoState === videoStates.Camera) {
         await videoProcess(videoStates.None);
       } else {
         await videoProcess(videoStates.Camera);
       }
     });
-    document.querySelector("#screenShareOnOff").on("click", async function () {
-      if ((videoState = videoStates.ScreenShare)) {
+    $("#screenShareOnOff").on("click", async function () {
+      if (videoState === videoStates.ScreenShare) {
         await videoProcess(videoStates.None);
       } else {
         await videoProcess(videoStates.Camera);
       }
     });
+  }
+
+  async function videoProcess(newVideoState) {
+    try {
+      let vstream = null;
+      if (newVideoState === videoStates.Camera) {
+        vstream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: 1920,
+            height: 1080,
+          },
+          audio: false,
+        });
+      } else if (newVideoState === videoStates.ScreenShare) {
+        vstream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            width: 1920,
+            height: 1080,
+          },
+          audio: false,
+        });
+      }
+
+      if (vstream && vstream.getVideoTracks().length) {
+        videoCamTrack = vstream.getVideoTracks()[0];
+        if (videoCamTrack) {
+          localDiv.srcObject = new MediaStream([videoCamTrack]);
+          //alert("Video cam found");
+          updateMediaSenders(videoCamTrack, rtpVideoSenders);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      return;
+    }
+    videoState = newVideoState;
   }
 
   async function setNewConnection(connId) {
@@ -114,6 +152,13 @@ let AppProcess = (function () {
 
     peersConnectionIds[connId] = connId;
     peersConnection[connId] = connection;
+
+    //To show streaming from other users
+    if (videoState === videoStates.Camera || videoState === videoStates.ScreenShare) {
+      if (videoCamTrack) {
+        updateMediaSenders(videoCamTrack, rtpVideoSenders);
+      }
+    }
 
     return connection;
   }
@@ -172,6 +217,9 @@ let MyApp = (function () {
   function init(uid, mid) {
     userId = uid;
     meetingId = mid;
+    $("#meetingContainer").removeClass("d-none");
+    $("#me h2").text(userId + " Me");
+    document.title = userId;
     eventProcesForSignalingServer();
   }
 
