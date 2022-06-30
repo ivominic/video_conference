@@ -72,6 +72,36 @@ let AppProcess = (function () {
     });
   }
 
+  function connectionStatus(connection) {
+    console.log("connection", connection);
+    console.log("connectionState", connection.connectionState);
+    if (
+      connection &&
+      (connection.connectionState == "new" ||
+        connection.connectionState == "connecting" ||
+        connection.connectionState == "connected")
+    ) {
+      console.log("TRUE");
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async function updateMediaSenders(track, rtpSenders) {
+    console.log("peersConectionsIds", peersConnectionIds);
+    for (let connId in peersConnectionIds) {
+      if (connectionStatus(peersConnection[connId])) {
+        //peersConnectionIds//TODO: Provjeriti da ne treba ova promjenljiva ovdje
+        if (rtpSenders[connId] && rtpSenders[connId].track) {
+          rtpSenders[connId].replaceTrack(track);
+        } else {
+          rtpSenders[connId] = peersConnection[connId].addTrack(track);
+        }
+      }
+    }
+  }
+
   async function videoProcess(newVideoState) {
     try {
       let vstream = null;
@@ -247,6 +277,7 @@ let MyApp = (function () {
 
     socket.on("inform_others_about_me", (data) => {
       addUser(data.otherUserId, data.connId);
+      //AppProcess.setNewConnection(data.connId);
       AppProcess.setNewConnection(connId);
     });
 
@@ -260,6 +291,8 @@ let MyApp = (function () {
     });
 
     socket.on("SDPProcess", async function (data) {
+      console.log("DATA", data);
+      //await AppProcess.processClientFunc(data.message, data.fromConnId);
       await AppProcess.processClientFunc(data.message, fromConnId);
     });
   }
