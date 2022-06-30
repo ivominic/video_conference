@@ -16,6 +16,15 @@ let AppProcess = (function () {
   let remoteAudioStream = [];
   let localDiv;
   let serverProcess;
+  let audio;
+  let isAudioMute = true;
+  let rtpAudioSenders = [];
+  let videoStates = {
+    None: 0,
+    Camera: 1,
+    ScreenShare: 2,
+  };
+  let videoState = videoStates.None;
 
   async function _init(sdpFunction, myConnId) {
     serverProcess = sdpFunction;
@@ -26,12 +35,37 @@ let AppProcess = (function () {
 
   async function eventProcess() {
     document.querySelector("#micMuteUnmute").on("click", async function () {
-      if (!audio) {
+      if (audio) {
         await loadAudio();
       }
       if (!audio) {
         alert("Audio permission has not been granted.");
         return;
+      }
+      if (isAudioMute) {
+        audio.enabled = true;
+        $(this).html('<span class="material-icons">mic</span>');
+        updateMediaSenders(audio, rtpAudioSenders);
+      } else {
+        audio.enabled = false;
+        $(this).html('<span class="material-icons">mic_off</span>');
+        removeMediaSenders(rtpAudioSenders);
+      }
+      isAudioMute = !isAudioMute;
+    });
+
+    document.querySelector("#videoCamOnOff").on("click", async function () {
+      if ((videoState = videoStates.Camera)) {
+        await videoProcess(videoStates.None);
+      } else {
+        await videoProcess(videoStates.Camera);
+      }
+    });
+    document.querySelector("#screenShareOnOff").on("click", async function () {
+      if ((videoState = videoStates.ScreenShare)) {
+        await videoProcess(videoStates.None);
+      } else {
+        await videoProcess(videoStates.Camera);
       }
     });
   }
